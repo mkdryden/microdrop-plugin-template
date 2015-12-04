@@ -1,9 +1,9 @@
 """
 Copyright 2015 Christian Fobel
 
-This file is part of droplet_planning_plugin.
+This file is part of microdrop_plugin_template.
 
-droplet_planning_plugin is free software: you can redistribute it and/or modify
+microdrop_plugin_template is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
@@ -14,11 +14,10 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with droplet_planning_plugin.  If not, see <http://www.gnu.org/licenses/>.
+along with microdrop_plugin_template.  If not, see <http://www.gnu.org/licenses/>.
 """
 import sys, traceback
 from datetime import datetime
-from collections import OrderedDict
 
 from path_helpers import path
 from flatland import Integer, Boolean, Form, String
@@ -30,11 +29,10 @@ from microdrop.plugin_manager import (PluginGlobals, Plugin, IPlugin,
                                       implements, emit_signal)
 from microdrop.app_context import get_app
 import gobject
-import gtk
 
 PluginGlobals.push_env('microdrop.managed')
 
-class DropletPlanningPlugin(Plugin, AppDataController, StepOptionsController):
+class MicrodropPluginTemplate(Plugin, AppDataController, StepOptionsController):
     """
     This class is automatically registered with the PluginManager.
     """
@@ -58,8 +56,9 @@ class DropletPlanningPlugin(Plugin, AppDataController, StepOptionsController):
             config file, in a section named after this plugin's name attribute
     '''
     AppFields = Form.of(
-        Integer.named('transition_duration_ms').using(optional=True,
-                                                      default=750),
+        Integer.named('duration_ms').using(optional=True, default=750),
+        #Boolean.named('bool_field').using(optional=True, default=False),
+        #String.named('string_field').using(optional=True, default=''),
     )
 
     '''
@@ -77,14 +76,18 @@ class DropletPlanningPlugin(Plugin, AppDataController, StepOptionsController):
         -the values of these fields will be stored persistently for each step
     '''
     StepFields = Form.of(
-        Integer.named('min_duration').using(default=0, optional=True),
+        #Integer.named('int_field').using(optional=True, default=750,
+                                          #validators=
+                                          #[ValueAtLeast(minimum=0),
+                                          # ValueAtMost(maximum=100000)]),
+        #Boolean.named('bool_field').using(optional=True, default=False),
+        #String.named('string_field').using(optional=True, default=''),
     )
 
     def __init__(self):
         self.name = self.plugin_name
         self.timeout_id = None
         self.start_time = None
-        self.transition_counter = 0
 
     def on_step_run(self):
         """
@@ -102,28 +105,17 @@ class DropletPlanningPlugin(Plugin, AppDataController, StepOptionsController):
             or 'Fail' - unrecoverable error (stop the protocol)
         """
         app = get_app()
-        logger.info('[DropletPlanningPlugin] on_step_run(): step #%d',
+        logger.info('[MicrodropPluginTemplate] on_step_run(): step #%d',
                     app.protocol.current_step_number)
         app_values = self.get_app_values()
-        device_step_options = app.dmf_device_controller.get_step_options()
         try:
             if self.timeout_id is not None:
                 # Timer was already set, so cancel previous timer.
                 gobject.source_remove(self.timeout_id)
 
-            drop_route_groups = (device_step_options.drop_routes
-                                 .groupby('route_i'))
-            # Look up the drop routes for the current step.
-            self.step_drop_routes = OrderedDict([(route_i, df_route_i)
-                                                 for route_i, df_route_i in
-                                                 drop_route_groups])
-            # Get the number of transitions in each drop route.
-            self.step_drop_route_lengths = drop_route_groups['route_i'].count()
-            self.transition_counter = 0
             self.start_time = datetime.now()
             gobject.idle_add(self.on_timer_tick, False)
-            self.timeout_id = gobject.timeout_add(app_values
-                                                  ['transition_duration_ms'],
+            self.timeout_id = gobject.timeout_add(app_values['duration_ms'],
                                                   self.on_timer_tick)
         except:
             print "Exception in user code:"
@@ -134,34 +126,17 @@ class DropletPlanningPlugin(Plugin, AppDataController, StepOptionsController):
             emit_signal('on_step_complete', [self.name, 'Fail'])
 
     def on_timer_tick(self, continue_=True):
-        app = get_app()
+        '''
+        Args:
+            continue_ (bool) : If `False`, timer does not trigger again.
+        Returns:
+            (bool) : If `True`, timer triggers again.  If `False`, timer stops.
+        '''
         try:
-            if self.transition_counter < self.step_drop_route_lengths.max():
-                active_step_lengths = (self.step_drop_route_lengths
-                                       .loc[self.step_drop_route_lengths >
-                                            self.transition_counter])
-                device_view = app.dmf_device_controller.view
-                for route_i, length_i in active_step_lengths.iteritems():
-                    # Remove custom coloring for previously active electrode.
-                    if self.transition_counter > 0:
-                        transition_i = (self.step_drop_routes[route_i]
-                                        .iloc[self.transition_counter - 1])
-                        device_view.set_electrode_color_by_index(transition_i
-                                                                 .electrode_i)
-                    # Add custom coloring to active electrode.
-                    transition_i = (self.step_drop_routes[route_i]
-                                    .iloc[self.transition_counter])
-                    device_view.set_electrode_color_by_index(transition_i
-                                                             .electrode_i,
-                                                             (255, 255, 255))
-                gtk.idle_add(app.dmf_device_controller.view.update_draw_queue)
-                self.transition_counter += 1
-            else:
-                emit_signal('on_step_complete', [self.name, None])
-                self.timeout_id = None
-                self.start_time = None
-                self.transition_counter = 0
-                return False
+            emit_signal('on_step_complete', [self.name, None])
+            self.timeout_id = None
+            self.start_time = None
+            return False
         except:
             print "Exception in user code:"
             print '-'*60
