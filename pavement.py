@@ -14,6 +14,7 @@ setup(name='microdrop-plugin-template',
       author_email='christian@fobel.net',
       url='https://github.com/wheeler-microfluidics/microdrop-plugin-template',
       license='GPL',
+      packages=['microdrop_plugin_template'],
       install_requires=['path-helpers', 'pip-helpers'],
       # Install data listed in `MANIFEST.in`
       include_package_data=True)
