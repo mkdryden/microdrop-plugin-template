@@ -1,0 +1,7 @@
+include RELEASE-VERSION
+include version.py
+include setup.py
+include paver-minilib.zip
+recursive-include microdrop_plugin_template *
+recursive-exclude microdrop_plugin_template *.pyc
+recursive-exclude microdrop_plugin_template *~
