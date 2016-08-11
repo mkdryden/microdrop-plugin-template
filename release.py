@@ -15,7 +15,11 @@ version = str(Version.from_git_repository())
 # write the 'properties.yml' file
 properties = {'plugin_name': plugin_name, 'package_name': package_name,
               'version': version}
-with open('properties.yml', 'w') as f:
+
+package_dir = ph.path(package_name)
+
+properties_path = package_dir.joinpath('properties.yml')
+with properties_path.open('w') as f:
     f.write(yaml.dump(properties))
 
 # create the tar.gz plugin archive
