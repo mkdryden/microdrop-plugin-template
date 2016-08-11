@@ -1,5 +1,6 @@
 import sys
 
+# TODO Remove dependency on `pandas`
 import pandas as pd
 from path_helpers import path
 
