@@ -1,8 +1,9 @@
+import itertools
 import tarfile
 import yaml
 
 from microdrop_utility import Version
-from path_helpers import path
+import path_helpers as ph
 
 package_name = 'microdrop_plugin_template'
 plugin_name = 'wheelerlab.microdrop_plugin_template'
@@ -18,9 +19,9 @@ with open('properties.yml', 'w') as f:
 
 # create the tar.gz plugin archive
 with tarfile.open("%s-%s.tar.gz" % (package_name, version), "w:gz") as tar:
-    for name in ['__init__.py', 'properties.yml', 'hooks',
-                 'on_plugin_install.py']:
-        tar.add(name)
-    requirements_file = path(__file__).parent.joinpath('requirements.txt')
-    if requirements_file.exists():
-        tar.add(requirements_file)
+    here = ph.path('.')
+    for path_i in itertools.chain(here.files('*.py'),
+                                    map(ph.path, ['properties.yml', 'hooks',
+                                                  'requirements.txt'])):
+        if path_i.exists():
+            tar.add(str(path_i))
