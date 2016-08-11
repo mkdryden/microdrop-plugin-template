@@ -21,9 +21,11 @@ package_dir = ph.path(package_name)
 properties_path = package_dir.joinpath('properties.yml')
 with properties_path.open('w') as f:
     f.write(yaml.dump(properties))
+    print 'Wrote: {}'.format(properties_path)
 
-# create the tar.gz plugin archive
-with tarfile.open("%s-%s.tar.gz" % (package_name, version), "w:gz") as tar:
+# Create the tar.gz plugin archive
+tar_path = "%s-%s.tar.gz" % (package_name, version)
+with tarfile.open(tar_path, "w:gz") as tar:
     current_dir = os.getcwd()
     try:
         os.chdir(package_name)
@@ -34,5 +36,6 @@ with tarfile.open("%s-%s.tar.gz" % (package_name, version), "w:gz") as tar:
                                                     'requirements.txt'])):
             if path_i.exists():
                 tar.add(str(here.relpathto(path_i)))
+        print 'Wrote: {}'.format(tar_path)
     finally:
         os.chdir(current_dir)
