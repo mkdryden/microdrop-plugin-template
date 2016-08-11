@@ -1,4 +1,5 @@
 import itertools
+import os
 import tarfile
 import yaml
 
@@ -19,9 +20,15 @@ with open('properties.yml', 'w') as f:
 
 # create the tar.gz plugin archive
 with tarfile.open("%s-%s.tar.gz" % (package_name, version), "w:gz") as tar:
-    here = ph.path('.')
-    for path_i in itertools.chain(here.files('*.py'),
-                                    map(ph.path, ['properties.yml', 'hooks',
-                                                  'requirements.txt'])):
-        if path_i.exists():
-            tar.add(str(path_i))
+    current_dir = os.getcwd()
+    try:
+        os.chdir(package_name)
+
+        here = ph.path('.')
+        for path_i in itertools.chain(here.files('*.py'),
+                                      map(ph.path, ['properties.yml', 'hooks',
+                                                    'requirements.txt'])):
+            if path_i.exists():
+                tar.add(str(here.relpathto(path_i)))
+    finally:
+        os.chdir(current_dir)
