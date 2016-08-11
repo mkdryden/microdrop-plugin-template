@@ -11,5 +11,9 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 PARENT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-PYTHON_EXE=$1
+if [[ ! -z  $1  ]];
+then PYTHON_EXE=$1
+else PYTHON_EXE=python
+fi
+
 $PYTHON_EXE ${PARENT_DIR}/../../on_plugin_install.py
