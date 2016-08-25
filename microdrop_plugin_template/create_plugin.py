@@ -1,8 +1,11 @@
+from argparse import ArgumentParser
 import fnmatch
 import pkg_resources
 import re
+import sys
 import tempfile as tmp
 
+from mpm.bin import LOG_PARSER
 import path_helpers as ph
 import rename_package_files as rp
 
@@ -35,8 +38,8 @@ def create_plugin(output_directory, overwrite=False):
     output_directory = ph.path(output_directory).realpath()
     new_name = output_directory.name
     if not CRE_PLUGIN_NAME.match(new_name):
-        raise ValueError('Invalid plugin name.  Name must be valid Python '
-                         'module name.')
+        raise ValueError('Invalid plugin name, "{}".  Name must be valid '
+                         'Python module name.'.format(new_name))
 
     # TODO Load ignore list from `.templateignore`
     ignore_list = ('*.pyc __init__.py create_plugin.py init_hooks.py rename.py'
@@ -96,3 +99,34 @@ def create_plugin(output_directory, overwrite=False):
         # Clean up working directory if necessary.
         if working_directory.isdir():
             working_directory.rmtree()
+
+
+def parse_args(args=None):
+    '''Parses arguments, returns ``(options, args)``.'''
+    if args is None:
+        args = sys.argv
+
+    parser = ArgumentParser(description='Create a new Microdrop plugin',
+                            parents=[LOG_PARSER])
+    parser.add_argument('-f', '--force-overwrite', action='store_true',
+                        help='Force overwrite of existing directory')
+    parser.add_argument('output_directory', type=ph.path, help='Output '
+                        'directory.  Directory name must be a valid Python '
+                        'module.')
+
+    return parser.parse_args()
+
+
+if __name__ == '__main__':
+    args = parse_args()
+    try:
+        output_directory = create_plugin(args.output_directory,
+                                         overwrite=args.force_overwrite)
+    except IOError, exception:
+        print >> sys.stderr, 'Output directory exists.  Use `-f` to overwrite'
+        raise SystemExit(-5)
+    except ValueError, exception:
+        print >> sys.stderr, exception
+        raise SystemExit(-10)
+    else:
+        print 'Wrote plugin to: {}'.format(output_directory)
