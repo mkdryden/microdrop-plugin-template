@@ -5,11 +5,13 @@ import re
 import sys
 import tempfile as tmp
 
+import git
 import path_helpers as ph
 import rename_package_files as rp
 
 
 CRE_PLUGIN_NAME = re.compile(r'^[A-Za-z_][\w_]+$')
+
 
 
 def create_plugin(output_directory, overwrite=False):
@@ -89,10 +91,30 @@ def create_plugin(output_directory, overwrite=False):
                                 new_name.replace('_', '-'),
                                 exclude='*on_plugin_install.py')
 
-        #  6. Rename created plugin directory to output path.
+        #  6. Initialize version to 0.1 (a version is required by `release.py`)
+        #         - If `git` is available, initialize plugin directory as `git`
+        #           repository, and tag contents as `v0.1`.
+        #         - Otherwise, create `RELEASE-VERSION` file containing "0.1".
+        try:
+            files = sorted(list(working_directory.walkfiles()))
+            repo = git.Repo.init(working_directory)
+            repo.index.add(files)
+            repo.index.commit('Initial commit')
+            repo.git.tag('-a', 'v0.1', '-m', 'Initial release')
+            del repo
+        except Exception, exception:
+            print >> sys.stderr, 'Error initializing git repo.'
+            print >> sys.stderr, exception
+            version_path = working_directory.joinpath('RELEASE-VERSION')
+            with version_path.open('w') as version_output:
+                version_output.write('0.1')
+            print 'Wrote version to file: RELEASE-VERSION'
+
+        #  7. Rename created plugin directory to output path.
         if output_directory.isdir():
             output_directory.rmtree()
         working_directory.rename(output_directory)
+
         return output_directory
     finally:
         # Clean up working directory if necessary.
