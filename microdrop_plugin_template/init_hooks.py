@@ -12,6 +12,19 @@ logger = logging.getLogger(__name__)
 
 
 def init_hooks(plugin_directory, overwrite=False):
+    '''
+    Copy default hook scripts to specified plugin.
+
+    Prompt to overwrite a hook script if it already exists (unless
+    ``overwrite==True``).
+
+    Parameters
+    ----------
+    plugin_directory : str
+        Microdrop plugin directory
+    overwrite : bool
+        If `True`, overwrite existing file with same name as output file.
+    '''
     plugin_directory = ph.path(plugin_directory)
 
     # Hook files to copy from plugin template.
@@ -73,7 +86,7 @@ def init_hooks(plugin_directory, overwrite=False):
 
 
 def parse_args(args=None):
-    '''Parses arguments, returns (options, args).'''
+    '''Parses arguments, returns ``(options, args)``.'''
     if args is None:
         args = sys.argv
 
