@@ -14,7 +14,7 @@ CRE_PLUGIN_NAME = re.compile(r'^[A-Za-z_][\w_]+$')
 
 
 
-def create_plugin(output_directory, overwrite=False):
+def create_plugin(output_directory, overwrite=False, init_git=True):
     '''
     Parameters
     ----------
@@ -74,9 +74,9 @@ def create_plugin(output_directory, overwrite=False):
                           for i in ignore_list)]
         #  3. Copy filtered files to output directory.
         for f in filtered_files:
-            resource_filename = ph.path(pkg_resources
-                                        .resource_filename('microdrop_plugin_template',
-                                        f))
+            resource_filename = \
+                ph.path(pkg_resources
+                        .resource_filename('microdrop_plugin_template', f))
             target_filename = working_directory / f
             target_filename.parent.makedirs_p()
             resource_filename.copy(target_filename)
@@ -95,16 +95,29 @@ def create_plugin(output_directory, overwrite=False):
         #         - If `git` is available, initialize plugin directory as `git`
         #           repository, and tag contents as `v0.1`.
         #         - Otherwise, create `RELEASE-VERSION` file containing "0.1".
-        try:
-            files = sorted(list(working_directory.walkfiles()))
-            repo = git.Repo.init(working_directory)
-            repo.index.add(files)
-            repo.index.commit('Initial commit')
-            repo.git.tag('-a', 'v0.1', '-m', 'Initial release')
-            del repo
-        except Exception, exception:
-            print >> sys.stderr, 'Error initializing git repo.'
-            print >> sys.stderr, exception
+        #
+        # TODO **N.B.**, File permissions prevent Git repositories from being
+        # removed (at least on Windows).  See if this happens on Linux too and
+        # report as bug to [`GitPython`][1] developers if it does.
+        #
+        # [1]: https://github.com/gitpython-developers/GitPython
+        version_initialized = False
+        if init_git:
+            try:
+                files = sorted(list(working_directory.walkfiles()))
+                repo = git.Repo.init(working_directory)
+                repo.index.add(files)
+                repo.index.commit('Initial commit')
+                tag = 'v0.1'
+                repo.git.tag('-a', tag, '-m', 'Initial release')
+                repo.git.clear_cache()
+                print 'Initialized plugin as git repo (tag={})'.format(tag)
+            except Exception, exception:
+                print >> sys.stderr, 'Error initializing git repo.'
+                print >> sys.stderr, exception
+            else:
+                version_initialized = True
+        if not version_initialized:
             version_path = working_directory.joinpath('RELEASE-VERSION')
             with version_path.open('w') as version_output:
                 version_output.write('0.1')
@@ -116,6 +129,9 @@ def create_plugin(output_directory, overwrite=False):
         working_directory.rename(output_directory)
 
         return output_directory
+    except Exception, exception:
+        print exception
+        raise
     finally:
         # Clean up working directory if necessary.
         if working_directory.isdir():
@@ -133,6 +149,8 @@ def parse_args(args=None):
                             parents=[LOG_PARSER])
     parser.add_argument('-f', '--force-overwrite', action='store_true',
                         help='Force overwrite of existing directory')
+    parser.add_argument('--no-git', action='store_true',
+                        help='Disable git repo initialization')
     parser.add_argument('output_directory', type=ph.path, help='Output '
                         'directory.  Directory name must be a valid Python '
                         'module.')
@@ -144,7 +162,8 @@ if __name__ == '__main__':
     args = parse_args()
     try:
         output_directory = create_plugin(args.output_directory,
-                                         overwrite=args.force_overwrite)
+                                         overwrite=args.force_overwrite,
+                                         init_git=not args.no_git)
     except IOError, exception:
         print >> sys.stderr, 'Output directory exists.  Use `-f` to overwrite'
         raise SystemExit(-5)
