@@ -16,7 +16,7 @@ setup(name='microdrop-plugin-template',
       license='GPL',
       packages=['microdrop_plugin_template'],
       install_requires=['microdrop-plugin-manager', 'path-helpers',
-                        'pip-helpers>=0.5.post8'],
+                        'pip-helpers>=0.5.post8', 'rename-package-files'],
       # Install data listed in `MANIFEST.in`
       include_package_data=True)
 
