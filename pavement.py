@@ -8,14 +8,15 @@ import version
 
 setup(name='microdrop-plugin-template',
       version=version.getVersion(),
-      description='Add description here.',
+      description='Microdrop plugin template',
       keywords='',
       author='Christian Fobel',
       author_email='christian@fobel.net',
       url='https://github.com/wheeler-microfluidics/microdrop-plugin-template',
       license='GPL',
       packages=['microdrop_plugin_template'],
-      install_requires=['path-helpers', 'pip-helpers'],
+      install_requires=['microdrop-plugin-manager', 'path-helpers',
+                        'pip-helpers'],
       # Install data listed in `MANIFEST.in`
       include_package_data=True)
 
