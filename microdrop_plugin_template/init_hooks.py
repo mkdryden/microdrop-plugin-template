@@ -5,7 +5,6 @@ import pkg_resources
 import sys
 
 import path_helpers as ph
-from mpm.bin import LOG_PARSER
 
 
 logger = logging.getLogger(__name__)
@@ -87,6 +86,8 @@ def init_hooks(plugin_directory, overwrite=False):
 
 def parse_args(args=None):
     '''Parses arguments, returns ``(options, args)``.'''
+    from mpm.bin import LOG_PARSER
+
     if args is None:
         args = sys.argv
 

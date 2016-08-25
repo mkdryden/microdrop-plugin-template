@@ -5,7 +5,6 @@ import re
 import sys
 import tempfile as tmp
 
-from mpm.bin import LOG_PARSER
 import path_helpers as ph
 import rename_package_files as rp
 
@@ -103,6 +102,8 @@ def create_plugin(output_directory, overwrite=False):
 
 def parse_args(args=None):
     '''Parses arguments, returns ``(options, args)``.'''
+    from mpm.bin import LOG_PARSER
+
     if args is None:
         args = sys.argv
 

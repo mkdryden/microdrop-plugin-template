@@ -1,4 +1,3 @@
-microdrop-plugin-manager
 numpydoc
 path-helpers
 pip-helpers>=0.5.post8
