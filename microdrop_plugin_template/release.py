@@ -1,24 +1,27 @@
 import itertools
 import os
+import sys
+sys.path.insert(0, '.')
 import tarfile
 import yaml
 
 from microdrop_utility import Version
 import path_helpers as ph
+from version import getVersion
+
+package_name = 'microdrop_plugin_template'
+plugin_name = 'wheelerlab.microdrop_plugin_template'
+
+package_dir = ph.path(__file__).realpath().parent
 
 
 if __name__ == '__main__':
-    package_name = 'microdrop_plugin_template'
-    plugin_name = 'wheelerlab.microdrop_plugin_template'
-
-    package_dir = ph.path(__file__).realpath().parent
-
     current_dir = ph.path(os.getcwd())
     os.chdir(package_dir)
 
     try:
         # create a version sting based on the git revision/branch
-        version = str(Version.from_git_repository())
+        version = getVersion()
 
         # Create the tar.gz plugin archive
         tar_path = current_dir.joinpath("%s-%s.tar.gz" % (package_name,
