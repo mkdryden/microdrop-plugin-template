@@ -1,3 +1,4 @@
+![https://ci.appveyor.com/api/projects/status/github/wheeler-microfluidics/microdrop-plugin-template?branch=master&svg=true](https://ci.appveyor.com/api/projects/status/github/wheeler-microfluidics/microdrop-plugin-template?branch=master&svg=true)
 Template for a Microdrop plugin.
 
 --------------------------------------------------
