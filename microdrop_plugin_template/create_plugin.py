@@ -111,17 +111,17 @@ def create_plugin(output_directory, overwrite=False, init_git=True):
                 tag = 'v0.1'
                 repo.git.tag('-a', tag, '-m', 'Initial release')
                 repo.git.clear_cache()
-                print 'Initialized plugin as git repo (tag={})'.format(tag)
-            except Exception, exception:
-                print >> sys.stderr, 'Error initializing git repo.'
-                print >> sys.stderr, exception
+                print('Initialized plugin as git repo (tag={})'.format(tag))
+            except Exception as exception:
+                print('Error initializing git repo.', file=sys.stderr)
+                print(exception, file=sys.stderr)
             else:
                 version_initialized = True
         if not version_initialized:
             version_path = working_directory.joinpath('RELEASE-VERSION')
             with version_path.open('w') as version_output:
                 version_output.write('0.1')
-            print 'Wrote version to file: RELEASE-VERSION'
+            print('Wrote version to file: RELEASE-VERSION')
 
         #  7. Rename created plugin directory to output path.
         if output_directory.isdir():
@@ -129,8 +129,8 @@ def create_plugin(output_directory, overwrite=False, init_git=True):
         working_directory.rename(output_directory)
 
         return output_directory
-    except Exception, exception:
-        print exception
+    except Exception as exception:
+        print(exception)
         raise
     finally:
         # Clean up working directory if necessary.
@@ -164,11 +164,11 @@ if __name__ == '__main__':
         output_directory = create_plugin(args.output_directory,
                                          overwrite=args.force_overwrite,
                                          init_git=not args.no_git)
-    except IOError, exception:
-        print >> sys.stderr, 'Output directory exists.  Use `-f` to overwrite'
+    except IOError as exception:
+        print('Output directory exists.  Use `-f` to overwrite', file=sys.stderr)
         raise SystemExit(-5)
-    except ValueError, exception:
-        print >> sys.stderr, exception
+    except ValueError as exception:
+        print(exception, file=sys.stderr)
         raise SystemExit(-10)
     else:
-        print 'Wrote plugin to: {}'.format(output_directory)
+        print('Wrote plugin to: {}'.format(output_directory))

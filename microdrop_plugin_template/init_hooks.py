@@ -50,10 +50,10 @@ def init_hooks(plugin_directory, overwrite=False):
                 response = None
                 skip_file = False
                 while response is None:
-                    print ('File exists: {}.  '
+                    print(('File exists: {}.  '
                            '[(s)kip]/s(k)ip all/(b)ackup/(o)verwrite/'
-                           'overwrite (a)ll?'.format(plugin_path_i)),
-                    response = raw_input() or 's'
+                           'overwrite (a)ll?'.format(plugin_path_i)), end=' ')
+                    response = input() or 's'
                     if response in ('s', 'skip'):
                         logger.debug('Skipping: %s', plugin_path_i)
                         skip_file = True
@@ -65,7 +65,7 @@ def init_hooks(plugin_directory, overwrite=False):
                         backup_path_i = (plugin_path_i + '.' +
                                          dt.datetime.now()
                                          .strftime('%Y-%m-%dT%Hh%Mm%S'))
-                        print 'Wrote backup to: {}'.format(backup_path_i)
+                        print('Wrote backup to: {}'.format(backup_path_i))
                         plugin_path_i.copy(backup_path_i)
                         break
                     elif response in ('o', 'overwrite'):

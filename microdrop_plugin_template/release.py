@@ -33,16 +33,16 @@ if __name__ == '__main__':
             properties_path = package_dir.joinpath('properties.yml')
             with properties_path.open('w') as f:
                 f.write(yaml.dump(properties))
-                print 'Wrote: {}'.format(properties_path)
+                print('Wrote: {}'.format(properties_path))
 
 
             here = ph.path('.')
             for path_i in itertools.chain(here.files('*.py'),
-                                          map(ph.path, ['properties.yml',
+                                          list(map(ph.path, ['properties.yml',
                                                         'hooks',
-                                                        'requirements.txt'])):
+                                                        'requirements.txt']))):
                 if path_i.exists():
                     tar.add(str(here.relpathto(path_i)))
-            print 'Wrote: {}'.format(current_dir.relpathto(tar_path))
+            print('Wrote: {}'.format(current_dir.relpathto(tar_path)))
     finally:
         os.chdir(current_dir)
